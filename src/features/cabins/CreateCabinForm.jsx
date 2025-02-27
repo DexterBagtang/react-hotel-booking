@@ -9,7 +9,7 @@ import {useCreateCabin} from "./useCreateCabin.js";
 import {useEditCabin} from "./useEditCabin.js";
 
 //this component receives the cabinToEdit prop from the CabinRow component
-function CreateCabinForm({cabinToEdit = {}}) {
+function CreateCabinForm({cabinToEdit = {},onCloseModal}) {
     //destructuring the received prop
     const {id: editId, ...editValues} = cabinToEdit;
 
@@ -44,13 +44,15 @@ function CreateCabinForm({cabinToEdit = {}}) {
         if (isEditSession) editCabin({newCabinData: {...data, image}, id: editId},
             {
                 onSuccess: () => {
-                    reset()
+                    reset();
+                    onCloseModal?.()
                 }
             })
         else createCabin({...data, image: data.image[0]},
             {
                 onSuccess: () => {
-                    reset()
+                    reset();
+                    onCloseModal?.();
                 }
             });
         // console.log(data);
@@ -61,7 +63,7 @@ function CreateCabinForm({cabinToEdit = {}}) {
     }
 
     return (
-        <Form onSubmit={handleSubmit(onSubmit, onError)}>
+        <Form onSubmit={handleSubmit(onSubmit, onError)} type={onCloseModal ? 'modal': 'regular'}>
             <FormRow label="Cabin name" error={errors?.name?.message}>
                 <Input type="text" id="name"
                        {...register("name"
@@ -118,7 +120,7 @@ function CreateCabinForm({cabinToEdit = {}}) {
 
             <FormRow>
                 {/* type is an HTML attribute! */}
-                <Button variation="secondary" type="reset">
+                <Button variation="secondary" type="reset" onClick={()=> onCloseModal?.()}>
                     Cancel
                 </Button>
                 <Button disabled={isWorking}>{isEditSession ? 'Edit Cabin' : 'Create new cabin'}</Button>
