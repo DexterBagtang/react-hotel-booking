@@ -7,6 +7,7 @@ import {useCreateCabin} from "./useCreateCabin.js";
 import Modal from "../../ui/Modal.jsx";
 import ConfirmDelete from "../../ui/ConfirmDelete.jsx";
 import Table from "../../ui/Table.jsx";
+import Menus from "../../ui/Menus.jsx";
 
 // const TableRow = styled.div`
 //     display: grid;
@@ -46,17 +47,18 @@ const Discount = styled.div`
     font-weight: 500;
     color: var(--color-green-700);
 `;
+
 //this component receives a cabin from the Cabin Table component
 function CabinRow({cabin}) {
     //destructure cabin prop
-    const {id: cabinId, name, maxCapacity, regularPrice, discount, image,description} = cabin;
+    const {id: cabinId, name, maxCapacity, regularPrice, discount, image, description} = cabin;
 
     //Custom Hook to delete a cabin
     const {isDeleting, deleteCabin} = useDeleteCabin();
 
     const {isCreating, createCabin} = useCreateCabin();
 
-    function handleDuplicate(){
+    function handleDuplicate() {
         createCabin({
             name: `Copy of ${name}`,
             maxCapacity,
@@ -68,40 +70,47 @@ function CabinRow({cabin}) {
     }
 
     return (
-        <>
-            <Table.Row role="row">
-                <Img src={image}/>
-                <Cabin>{name}</Cabin>
-                <div>Fits up to {maxCapacity}</div>
-                <Price>{formatCurrency(regularPrice)}</Price>
-                {discount ? <Discount>{formatCurrency(discount)}</Discount>
+        <Table.Row role="row">
+            <Img src={image}/>
+            <Cabin>{name}</Cabin>
+            <div>Fits up to {maxCapacity}</div>
+            <Price>{formatCurrency(regularPrice)}</Price>
+            {discount ? <Discount>{formatCurrency(discount)}</Discount>
                 : <span>&mdash;</span>}
-                <div>
-                    <button disabled={isCreating} onClick={handleDuplicate}>
-                        <HiSquare2Stack />
-                    </button>
-                    <Modal>
-                        <Modal.Open opens="edit">
-                            <button><HiPencil /></button>
-                        </Modal.Open>
+            <div>
+                <Modal>
+                    <Menus.Menu>
+                        <Menus.Toggle id={cabinId}/>
+                        <Menus.List id={cabinId}>
+                            <Menus.Button
+                                icon={<HiSquare2Stack/>}
+                                onClick={handleDuplicate}
+                            >Duplicate</Menus.Button>
+                            <Modal.Open opens="edit">
+                                <Menus.Button icon={<HiPencil/>}>Edit</Menus.Button>
+                            </Modal.Open>
+                            <Modal.Open opens="delete">
+                                <Menus.Button icon={<HiTrash/>}>Delete</Menus.Button>
+                            </Modal.Open>
+                        </Menus.List>
+
                         <Modal.Window name="edit">
-                            <CreateCabinForm cabinToEdit={cabin} />
+                            <CreateCabinForm cabinToEdit={cabin}/>
                         </Modal.Window>
 
-                        <Modal.Open opens="delete">
-                            <button disabled={isDeleting}><HiTrash /></button>
-                        </Modal.Open>
                         <Modal.Window name="delete">
                             <ConfirmDelete
                                 resourceName="cabins"
                                 disabled={isDeleting}
-                                onConfirm={()=>deleteCabin(cabinId)}
+                                onConfirm={() => deleteCabin(cabinId)}
                             />
                         </Modal.Window>
-                    </Modal>
-                </div>
-            </Table.Row>
-        </>
+
+                    </Menus.Menu>
+                </Modal>
+
+            </div>
+        </Table.Row>
     )
 
 }
